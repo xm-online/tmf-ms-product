@@ -1,0 +1,39 @@
+anguage: java
+jdk:
+- oraclejdk8
+install: true
+addons:
+  sonarcloud:
+    organization: xm-online
+    token:
+      secure: h0gSs0LPtbVvnfE4MUgQXw/SF0yWUwromrs9j/n+lB5I37McteXR6Y8sXacE3jFsj90BCGzlig+l8rCFl1mXYhZ/FfNJozYDGYXZEyWGcSrwJ2CWXJQ5CdZniw8/iNvStBp0dB4/deymuLscs1nLrfIM0cL2IhqCRXl2TG78Rjuua/QIqbpjsZxLtV17sNJFkBIDjIbxkPqNYe0N2i0ecVVXU0vt9JPauloQ6X7p2WOpkrO74UP5FkAZd9/eDbazAdI0Ivvux27rmWcLxX1xE1+rBWSZds/qB0UO9YowTKO6Fe/f38l9rVqxdgla0SitguwVyCBENINA0XlzgLa9JBnZDolOYTMGilH3wbfOgCL2eHMuBjeIEyC7l5TlSSuC1WWqs/oVqyjoBKd4L2tV/fjM45aqq6MBmx+X06XGDrYlQt6lLxnkNjyvwGbaSNrRNddoeb6Wqt3tZp3UmPEI/hjzdOBxCuIo3jnSggRtLnFanzCBY8ruyOr6AyIr68A0YeHsuox/amU5zKIxsyqnyU3wj51OQZy/IgFvegeYc2U6SXq6joDm3496XJY9AwPHCZXe/lC/UowCbZ6Qf+g2obi4xJgu66CJuxU9DGTdwQKnjQUU3Shfmff3av2WSAGUMVYyvMZrVoIya6epvJKKKvitrxyuHOD2z20qRaBtnDU=
+    branches:
+    - master
+script:
+- set -e
+- "./gradlew --no-daemon --refresh-dependencies clean check test"
+- "./gradlew -x test -Pprod --no-daemon bootWar"
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
+- export DOCKER_REPO=$(echo  -n $TRAVIS_REPO_SLUG | sed -e 's/^xm-online\//xmonline\//g')
+- export IMAGE_BRANCH=$(echo -n $TRAVIS_BRANCH | sed -e 's/\//-/g')
+- docker build -t $DOCKER_REPO:$IMAGE_BRANCH -t $DOCKER_REPO:$IMAGE_BRANCH-$TRAVIS_BUILD_NUMBER
+  --label commit_id="$TRAVIS_COMMIT" --label commit_message="$TRAVIS_COMMIT_MESSAGE"
+  -f src/main/docker/Dockerfile .
+- docker push $DOCKER_REPO:$IMAGE_BRANCH
+- docker push $DOCKER_REPO:$IMAGE_BRANCH-$TRAVIS_BUILD_NUMBER
+- if [ "$IMAGE_BRANCH" == "master" ]; then docker tag $DOCKER_REPO:$IMAGE_BRANCH $DOCKER_REPO:latest;
+  docker push $DOCKER_REPO:latest; export SONAR_PK=$(echo  -n $TRAVIS_REPO_SLUG |
+  sed -e 's/\//:/g'); ./gradlew -x test --no-daemon sonarqube -Dsonar.projectKey="$SONAR_PK"
+  -Dsonar.projectName="$SONAR_PK" -Dsonar.java.binaries="." -Dsonar.projectVersion="$IMAGE_BRANCH";
+  fi
+cache:
+  directories:
+  - "~/.gradle/"
+env:
+  global:
+  - secure: Uk2pKauLn9ElDf53XFftIg+hMAzMR0f5enokwOrPVtpw5vBrkSnrLfCMd7mMsx2oXKZ/JATgfMNgJNvgSMwgdvk8UFOURpvRMiqBqermzQAJkF+O0/pI8ZmZcFe9zd3jawXpxxVOZTHkUoTChQ+VRbg5ZJxX6fQqeh6LqUcM3T54iKVy9Yp4v7txNC0oSaDnuaD3KSfqfW6munx4+WB8ekSKzEmDvS43ivJpg0YCYP+COWEkiGBL6dXEun0Qi+kILJh3I82zhQyJXMBFAleeQN+uQSq6qEW5nZimNw/SMS4Rvoz296t/EcoQGoFD/VeSK707OQUg9nAWSVKnSVoLrZdONZW1q5o96nAoFa1OSjxNgVmwO7/VE2lx5azbtsaXvXhguYMf27bOYk0hrIjy96Hg/SBw/WGltfQbnPN74u83puSXvCjghDhjkGAPimHZgEQTuJ5UHezjo9iPYrveLexbivruOHqODMzqHXbZ4Cle2QjzSJMtgRtTDXfG9DTwxg2QCDFX9Nzml5zEr/n7R8t3uA7WI0DXLeoInRKg00c106u4uPcIE6LLihZZ0aXpH+CU2FahYr2CCOOa0RNE0ulGjqyFdKnMC6MJ0+w8t2gFx6kmkT+fkl2053TTrIFFhnB5wev4ak9DJX1lIzPH5RP3N15TSMk01NVl9Gg/YvI=
+  - secure: O3BDQSoKTJlGwg826wJ9UvRIoVYRArqdAFN0idqmWxXFMPVnSy17spuJXaKS7V9BtSoL06LjeaCq5teiuwD67a7XUJWpT9ARb6SpJAK7lfkmZWOU+yejK8Is9NLT1VpZSrQ/hZCjCQ3E89AYlxjRmcDJI16A4m2XpgsXcLxC9VHEznSD1PrbEunqMMYMOR25LXjjcqTwp5K8LlnEDKLUvCmZKCGc2jyCLgIQ1TDtWQqpZn0M27/pdaqiEY3jkkLk3JItYW4Dama4MdSyp/s30CVEjDwUpsQg/0SX5hv5SmHcUFhN2VuVqrfURsjZiyjUy52WjIZ5nmcmsus8dGcQvkbaT5LmEikSk6Wr64odMxXmLrKxh50Yynu/fTOamJTmkfZazK+G/k7mihNJ33iFJuRIikCk+c3ejdqMUvYHTvGImpHS/H3t45g0cmw0FlF0WrxgIdzGhKHOxFEVLbJcxpBt++xus7LFlmp6hmQ8QGOhn8m4K6sr3Ra1E1dmA7SmiPqpJqfWsBLsbr4IykjBmBQWG8gdv7q1ozGQQMgjg71mlPuf+nTd+ngO979KN8kRWomNWAtmdv+saiEz8EmTSfIrlGMYcUGowxTqn0HSInuA+IP/BM/LakSXuP5oskay7zaUB1haVlYEwgtKMMu25QS7M7B6cG4DAeDfAeSradU=
+notifications:
+  slack:
+    rooms:
+      secure: jkgxoECtFV21tdb9X9Ofn+KxYDcst1UidAQZpDJkV3b1q9gI6GQfgRMVoH2wBRV5/xAjTLbVf0plUchYwGv5yEayXjM54L87hbEGOwx5ShodbI3yd/P3t/hte2aEYXeNG7bBvhaQhAW2xeHogFn7O4rEKnrU0nMleletMGAoHnyzhyTaZA/XV4CB3LbbbYbCrQBz1CQMmfVrqs+Tg6VJCjs6b5oYx4NMLNyJ+Ow+OYDfx05TH8YwlpgBaa8JZXSPPlejuFdG1zAZqUSTWHvVqPo2QO9JDaB7DvTCCKhvKARd+6U29mCp5nVKXjwP5pLTTqGPruRHGMIuDFuDUCuZWYuBRjfqG5hm+9Andm2MMX75zISJanzjUoR9Qp9soWVSdk5DYfAB6VGSZdIfEbydaL0pmIgdpAgglD7Cs1sB6ZaK+JsqP/mn2+PK6KzA568SpY4Jd5bO4o4ukuOJX9tzXVKZ0dIje7rwxaVp/i97rHxtmAh3fiYf788PKqzlM+I16QOT21G4SFJwHpV6ZgLEGIEeT3Ng0GBjGku6/MpEIddvwwU5/l6HanRM29SPCnPYlnP9sPk3lzYp5ZxO3XkQdipmXmmxsOH6bbDV/NXa5ANPVWGSEOD32w39ne1ORGF9FvAtRwFZy7tMvyECjYd7POVT7EjYAlNBWYq1m7s/SWM=
