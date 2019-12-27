@@ -1,8 +1,10 @@
 package com.icthh.xm.tmf.ms.product.client;
 
-import feign.RequestInterceptor;
 import java.io.IOException;
+
 import org.springframework.context.annotation.Bean;
+
+import feign.RequestInterceptor;
 
 public class OAuth2UserClientFeignConfiguration {
 
