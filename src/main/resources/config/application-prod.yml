@@ -53,6 +53,8 @@ spring:
     locator:
       discovery:
         enabled: true
+  kafka:
+    bootstrap-servers: localhost:9093
 
 # ===================================================================
 # To enable TLS in production, generate a certificate using:
