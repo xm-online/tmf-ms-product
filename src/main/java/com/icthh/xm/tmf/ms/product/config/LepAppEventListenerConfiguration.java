@@ -2,6 +2,7 @@ package com.icthh.xm.tmf.ms.product.config;
 
 import com.icthh.xm.commons.config.client.service.TenantConfigService;
 import com.icthh.xm.commons.lep.commons.CommonsService;
+import com.icthh.xm.commons.mail.provider.MailProviderService;
 import com.icthh.xm.commons.permission.service.PermissionCheckService;
 import com.icthh.xm.tmf.ms.product.lep.XmMsLepProcessingApplicationListener;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,13 +21,15 @@ public class LepAppEventListenerConfiguration {
         TenantConfigService tenantConfigService,
         @Qualifier("loadBalancedRestTemplate") RestTemplate restTemplate,
         CommonsService commonsService,
-        PermissionCheckService permissionCheckService) {
+        PermissionCheckService permissionCheckService,
+        MailProviderService mailProviderService) {
 
         return new XmMsLepProcessingApplicationListener(
             tenantConfigService,
             restTemplate,
             commonsService,
-            permissionCheckService);
+            permissionCheckService,
+            mailProviderService);
     }
 
 }
