@@ -13,4 +13,4 @@ pluginManagement {
      }
 }
 
-rootProject.name = "product"
+rootProject.name = "tmf-ms-product"

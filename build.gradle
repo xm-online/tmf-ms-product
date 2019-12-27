@@ -26,6 +26,7 @@ plugins {
     id "net.ltgt.apt"
     id "org.sonarqube"
     id "io.spring.nohttp"
+    id "com.github.spotbugs" version "1.6.3"
     //jhipster-needle-gradle-plugins - JHipster will add additional gradle plugins here
 }
 
@@ -55,6 +56,27 @@ if (project.hasProperty("war")) {
 
 if (project.hasProperty("zipkin")) {
     apply from: "gradle/zipkin.gradle"
+}
+
+apply plugin: 'checkstyle'
+checkstyle {
+    toolVersion = "7.6.1"
+    ignoreFailures = true
+    configFile = rootProject.file('./qa/checkstyle.xml')
+}
+
+spotbugs {
+    toolVersion = '3.1.3'
+    ignoreFailures = true
+}
+
+apply plugin: 'pmd'
+
+pmd {
+    rulePriority = 3
+    toolVersion = '5.5.4'
+    ignoreFailures = true
+    ruleSetFiles = files("./qa/pmd.xml")
 }
 
 idea {
@@ -109,7 +131,12 @@ test {
     // uncomment if the tests reports are not generated
     // see https://github.com/jhipster/generator-jhipster/pull/2771 and https://github.com/jhipster/generator-jhipster/pull/4484
     // ignoreFailures true
-    reports.html.enabled = false
+    reports.html.enabled = true
+    testLogging {
+        events = ["passed", "failed", "skipped", "standardOut", "standardError"]
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
 }
 
 task integrationTest(type: Test) {
@@ -180,6 +207,11 @@ repositories {
 }
 
 dependencies {
+    compile "com.icthh.xm.commons:xm-commons-security:${xm_commons_version}"
+    compileOnly "org.projectlombok:lombok:${lombok_version}"
+    annotationProcessor "org.projectlombok:lombok:${lombok_version}"
+    compile "com.icthh.xm.commons:xm-commons-logging-web:${xm_commons_version}"
+
     // import JHipster dependencies BOM
     implementation platform("io.github.jhipster:jhipster-dependencies:${jhipster_dependencies_version}" )
 
