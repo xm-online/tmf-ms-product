@@ -2,9 +2,15 @@ package com.icthh.xm.tmf.ms.product.lep.keyresolver;
 
 import com.icthh.xm.commons.lep.XmLepConstants;
 import com.icthh.xm.commons.lep.spring.LepServiceHandler;
-import com.icthh.xm.lep.api.*;
+import com.icthh.xm.lep.api.LepKey;
+import com.icthh.xm.lep.api.LepKeyResolver;
+import com.icthh.xm.lep.api.LepManager;
+import com.icthh.xm.lep.api.LepMethod;
+import com.icthh.xm.lep.api.Version;
 import com.icthh.xm.lep.core.CoreLepManager;
 import com.icthh.xm.tmf.ms.product.web.rest.ProductDelegate;
+import java.lang.reflect.Method;
+import javax.servlet.http.HttpServletRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -14,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 
-import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -44,6 +49,9 @@ public class ProfileChannelKeyResolverTest {
     @Captor
     private ArgumentCaptor<Version> version;
 
+    @Mock
+    private HttpServletRequest request;
+
     @Test
     public void testResolveLepKeyByProfileAndChannelId() throws Throwable {
 
@@ -55,7 +63,7 @@ public class ProfileChannelKeyResolverTest {
         when(applicationContext.getBean(ProfileChannelKeyResolver.class)).thenReturn(resolver);
 
         lepServiceHandler.onMethodInvoke(ProductDelegate.class,
-            new ProductDelegate(), method, new Object[]{"RTM", "MYVODAFONE"});
+            new ProductDelegate(request), method, new Object[]{"RTM", "MYVODAFONE"});
 
         verify(lepManager)
             .processLep(baseLepKey.capture(), version.capture(), keyResolver.capture(), lepMethod.capture());
