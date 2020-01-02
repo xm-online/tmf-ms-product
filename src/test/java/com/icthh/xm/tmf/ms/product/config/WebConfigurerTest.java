@@ -12,6 +12,7 @@ import io.undertow.UndertowOptions;
 import org.h2.server.web.WebServlet;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.env.MockEnvironment;
@@ -48,6 +49,8 @@ public class WebConfigurerTest {
 
     private JHipsterProperties props;
 
+    private ServerProperties serverProperties;
+
     private MetricRegistry metricRegistry;
 
     @Before
@@ -60,8 +63,9 @@ public class WebConfigurerTest {
 
         env = new MockEnvironment();
         props = new JHipsterProperties();
+        serverProperties = new ServerProperties();
 
-        webConfigurer = new WebConfigurer(env, props);
+        webConfigurer = new WebConfigurer(env, props, serverProperties);
         metricRegistry = new MetricRegistry();
         webConfigurer.setMetricRegistry(metricRegistry);
     }
@@ -107,7 +111,7 @@ public class WebConfigurerTest {
 
     @Test
     public void testUndertowHttp2Enabled() {
-        props.getHttp().setVersion(JHipsterProperties.Http.Version.V_2_0);
+        serverProperties.getHttp2().setEnabled(true);
         UndertowServletWebServerFactory container = new UndertowServletWebServerFactory();
         webConfigurer.customize(container);
         Builder builder = Undertow.builder();
