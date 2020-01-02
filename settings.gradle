@@ -10,6 +10,7 @@ pluginManagement {
           id 'net.ltgt.apt-idea' version "${apt_plugin_version}"
           id 'net.ltgt.apt' version "${apt_plugin_version}"
           id 'com.github.spotbugs' version "${spotbugs_plugin_version}"
+          id 'org.openapi.generator' version "${openapi_plugin_version}"
      }
 }
 
