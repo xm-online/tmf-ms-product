@@ -18,4 +18,4 @@ ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
 # add directly the war
 ADD build/libs/*.war /app.war
 
-EXPOSE 8712
+EXPOSE 8707
