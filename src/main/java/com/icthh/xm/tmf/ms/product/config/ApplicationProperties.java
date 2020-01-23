@@ -24,6 +24,9 @@ public class ApplicationProperties {
     private String kafkaSystemQueue;
     private boolean timelinesEnabled;
 
+    private final Retry retry = new Retry();
+    private final KafkaEventSender kafkaEventSender = new KafkaEventSender();
+
     private List<String> tenantIgnoredPathList = Collections.emptyList();
 
     @Getter
@@ -31,5 +34,19 @@ public class ApplicationProperties {
     public static class Lep {
         private TenantScriptStorage tenantScriptStorage;
         private String lepResourcePathPattern;
+    }
+
+    @Getter
+    @Setter
+    private static class KafkaEventSender {
+        private Retry retry;
+    }
+
+    @Getter
+    @Setter
+    private static class Retry {
+        private int maxAttempts;
+        private long delay;
+        private int multiplier;
     }
 }
