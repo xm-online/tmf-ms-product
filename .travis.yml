@@ -1,6 +1,6 @@
 anguage: java
 jdk:
-- openjdk8
+- openjdk11
 install: true
 addons:
   sonarcloud:
@@ -9,23 +9,31 @@ addons:
       secure: h0gSs0LPtbVvnfE4MUgQXw/SF0yWUwromrs9j/n+lB5I37McteXR6Y8sXacE3jFsj90BCGzlig+l8rCFl1mXYhZ/FfNJozYDGYXZEyWGcSrwJ2CWXJQ5CdZniw8/iNvStBp0dB4/deymuLscs1nLrfIM0cL2IhqCRXl2TG78Rjuua/QIqbpjsZxLtV17sNJFkBIDjIbxkPqNYe0N2i0ecVVXU0vt9JPauloQ6X7p2WOpkrO74UP5FkAZd9/eDbazAdI0Ivvux27rmWcLxX1xE1+rBWSZds/qB0UO9YowTKO6Fe/f38l9rVqxdgla0SitguwVyCBENINA0XlzgLa9JBnZDolOYTMGilH3wbfOgCL2eHMuBjeIEyC7l5TlSSuC1WWqs/oVqyjoBKd4L2tV/fjM45aqq6MBmx+X06XGDrYlQt6lLxnkNjyvwGbaSNrRNddoeb6Wqt3tZp3UmPEI/hjzdOBxCuIo3jnSggRtLnFanzCBY8ruyOr6AyIr68A0YeHsuox/amU5zKIxsyqnyU3wj51OQZy/IgFvegeYc2U6SXq6joDm3496XJY9AwPHCZXe/lC/UowCbZ6Qf+g2obi4xJgu66CJuxU9DGTdwQKnjQUU3Shfmff3av2WSAGUMVYyvMZrVoIya6epvJKKKvitrxyuHOD2z20qRaBtnDU=
     branches:
     - master
+
 script:
-- set -e
-- "./gradlew --no-daemon --refresh-dependencies clean check test"
-- "./gradlew -x test -Pprod --no-daemon bootWar"
-- docker login -u $DOCKER_USER -p $DOCKER_PASS
-- export DOCKER_REPO=$(echo  -n $TRAVIS_REPO_SLUG | sed -e 's/^xm-online\//xmonline\//g')
-- export IMAGE_BRANCH=$(echo -n $TRAVIS_BRANCH | sed -e 's/\//-/g')
-- docker build -t $DOCKER_REPO:$IMAGE_BRANCH -t $DOCKER_REPO:$IMAGE_BRANCH-$TRAVIS_BUILD_NUMBER
-  --label commit_id="$TRAVIS_COMMIT" --label commit_message="$TRAVIS_COMMIT_MESSAGE"
-  -f src/main/docker/Dockerfile .
-- docker push $DOCKER_REPO:$IMAGE_BRANCH
-- docker push $DOCKER_REPO:$IMAGE_BRANCH-$TRAVIS_BUILD_NUMBER
-- if [ "$IMAGE_BRANCH" == "master" ]; then docker tag $DOCKER_REPO:$IMAGE_BRANCH $DOCKER_REPO:latest;
-  docker push $DOCKER_REPO:latest; export SONAR_PK=$(echo  -n $TRAVIS_REPO_SLUG |
-  sed -e 's/\//:/g'); ./gradlew -x test --no-daemon sonarqube -Dsonar.projectKey="$SONAR_PK"
-  -Dsonar.projectName="$SONAR_PK" -Dsonar.java.binaries="." -Dsonar.projectVersion="$IMAGE_BRANCH";
-  fi
+  - set -e
+  - "./gradlew --no-daemon --refresh-dependencies clean check test"
+  - "./gradlew -x test -Pprod --no-daemon bootWar"
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - export DOCKER_REPO=$(echo  -n $TRAVIS_REPO_SLUG | sed -e 's/^xm-online\//xmonline\//g')
+  - export IMAGE_BRANCH=$(echo -n $TRAVIS_BRANCH | sed -e 's/\//-/g')
+  - export PROJECT_VERSION=$(./gradlew -q  getProjectVersion)
+  - if [ "$IMAGE_BRANCH" == "master" ]; 
+    then 
+        export SONAR_PK=$(echo  -n $TRAVIS_REPO_SLUG | sed -e 's/\//:/g');
+        ./gradlew -x test --no-daemon sonarqube -Dsonar.projectKey="$SONAR_PK"
+        -Dsonar.projectName="$SONAR_PK" -Dsonar.java.binaries="." -Dsonar.projectVersion="$IMAGE_BRANCH";
+        TAGS="$PROJECT_VERSION $PROJECT_VERSION-$TRAVIS_BUILD_NUMBER $(echo $PROJECT_VERSION | awk -F '.' '{printf $1"."$2" "$1}') latest";
+    else
+        TAGS="$IMAGE_BRANCH $IMAGE_BRANCH-$TRAVIS_BUILD_NUMBER";
+    fi
+  - docker build -t app-docker-img --label commit_id="$TRAVIS_COMMIT" --label commit_message="$TRAVIS_COMMIT_MESSAGE" -f src/main/docker/Dockerfile .
+  - for TAG in $TAGS;
+    do
+        docker tag app-docker-img $DOCKER_REPO:$TAG;
+        docker push $DOCKER_REPO:$TAG;
+    done
+
 cache:
   directories:
   - "~/.gradle/"
