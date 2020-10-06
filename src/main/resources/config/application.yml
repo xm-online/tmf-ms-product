@@ -132,7 +132,7 @@ jhipster:
     mail:
         from: product@localhost
     swagger:
-        default-include-pattern: /api/.*
+        default-include-pattern: /(api|tmf-api)/.*
         title: product API
         description: product API documentation
         version: 0.0.1
