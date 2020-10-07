@@ -793,7 +793,8 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/Error"
 servers:
-    - url: https://serverRoot//api/productInventory/v4
+    - url: http://localhost:8080/api
+      description: Development server
 components:
     schemas:
         AgreementItemRef:
