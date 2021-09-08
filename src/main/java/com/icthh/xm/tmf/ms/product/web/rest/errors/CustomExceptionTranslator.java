@@ -3,6 +3,7 @@ package com.icthh.xm.tmf.ms.product.web.rest.errors;
 import io.github.jhipster.web.util.HeaderUtil;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -30,7 +31,8 @@ import java.util.stream.Collectors;
  * The error response follows RFC7807 - Problem Details for HTTP APIs (https://tools.ietf.org/html/rfc7807).
  */
 @ControllerAdvice
-public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait {
+@ConditionalOnProperty(name = "application.exception-translator", havingValue = "custom", matchIfMissing = true)
+public class CustomExceptionTranslator implements ProblemHandling, SecurityAdviceTrait {
 
     private static final String FIELD_ERRORS_KEY = "fieldErrors";
     private static final String MESSAGE_KEY = "message";

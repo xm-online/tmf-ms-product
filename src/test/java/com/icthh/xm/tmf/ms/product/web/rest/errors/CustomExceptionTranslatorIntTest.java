@@ -1,6 +1,5 @@
 package com.icthh.xm.tmf.ms.product.web.rest.errors;
 
-import com.icthh.xm.commons.i18n.error.web.ExceptionTranslator;
 import com.icthh.xm.tmf.ms.product.ProductApp;
 import com.icthh.xm.tmf.ms.product.config.SecurityBeanOverrideConfiguration;
 import org.junit.Before;
@@ -23,17 +22,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Test class for the ExceptionTranslator controller advice.
  *
- * @see ExceptionTranslator
+ * @see CustomExceptionTranslator
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SecurityBeanOverrideConfiguration.class, ProductApp.class})
-public class ExceptionTranslatorIntTest {
+public class CustomExceptionTranslatorIntTest {
 
     @Autowired
     private ExceptionTranslatorTestController controller;
 
     @Autowired
-    private ExceptionTranslator exceptionTranslator;
+    private CustomExceptionTranslator exceptionTranslator;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -52,17 +51,17 @@ public class ExceptionTranslatorIntTest {
     public void testConcurrencyFailure() throws Exception {
         mockMvc.perform(get("/test/concurrency-failure"))
             .andExpect(status().isConflict())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$.error").value(com.icthh.xm.commons.exceptions.ErrorConstants.ERR_CONCURRENCY_FAILURE));
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value(ErrorConstants.ERR_CONCURRENCY_FAILURE));
     }
 
     @Test
     public void testMethodArgumentNotValid() throws Exception {
          mockMvc.perform(post("/test/method-argument").content("{}").contentType(MediaType.APPLICATION_JSON))
              .andExpect(status().isBadRequest())
-             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-             .andExpect(jsonPath("$.error").value(ErrorConstants.ERR_VALIDATION))
-             .andExpect(jsonPath("$.fieldErrors.[0].objectName").value("testDTO"))
+             .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+             .andExpect(jsonPath("$.message").value(ErrorConstants.ERR_VALIDATION))
+             .andExpect(jsonPath("$.fieldErrors.[0].objectName").value("test"))
              .andExpect(jsonPath("$.fieldErrors.[0].field").value("test"))
              .andExpect(jsonPath("$.fieldErrors.[0].message").value("NotNull"));
     }
@@ -70,82 +69,83 @@ public class ExceptionTranslatorIntTest {
     @Test
     public void testParameterizedError() throws Exception {
         mockMvc.perform(get("/test/parameterized-error"))
-            .andExpect(status().isInternalServerError())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$.error").value("error.internalServerError"))
-            .andExpect(jsonPath("$.error_description").value("Internal server error, please try later"));
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("test parameterized error"))
+            .andExpect(jsonPath("$.params.param0").value("param0_value"))
+            .andExpect(jsonPath("$.params.param1").value("param1_value"));
     }
 
     @Test
     public void testParameterizedError2() throws Exception {
         mockMvc.perform(get("/test/parameterized-error2"))
-            .andExpect(status().isInternalServerError())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$.error").value("error.internalServerError"))
-            .andExpect(jsonPath("$.error_description").value("Internal server error, please try later"));
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("test parameterized error"))
+            .andExpect(jsonPath("$.params.foo").value("foo_value"))
+            .andExpect(jsonPath("$.params.bar").value("bar_value"));
     }
 
     @Test
     public void testMissingServletRequestPartException() throws Exception {
         mockMvc.perform(get("/test/missing-servlet-request-part"))
-            .andExpect(status().isInternalServerError())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$.error").value("error.internalServerError"))
-            .andExpect(jsonPath("$.error_description").value("Internal server error, please try later"));
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("error.http.400"));
     }
 
     @Test
     public void testMissingServletRequestParameterException() throws Exception {
         mockMvc.perform(get("/test/missing-servlet-request-parameter"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("error.http.400"));
     }
 
     @Test
     public void testAccessDenied() throws Exception {
         mockMvc.perform(get("/test/access-denied"))
             .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.error").value(com.icthh.xm.commons.exceptions.ErrorConstants.ERR_ACCESS_DENIED))
-            .andExpect(jsonPath("$.error_description").value("Access denied"));
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("error.http.403"))
+            .andExpect(jsonPath("$.detail").value("test access denied!"));
     }
 
     @Test
     public void testUnauthorized() throws Exception {
         mockMvc.perform(get("/test/unauthorized"))
-            .andExpect(status().isInternalServerError())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(jsonPath("$.error").value("error.internalServerError"))
-            .andExpect(jsonPath("$.error_description").value("Internal server error, please try later"));
+            .andExpect(status().isUnauthorized())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("error.http.401"))
+            .andExpect(jsonPath("$.path").value("/test/unauthorized"))
+            .andExpect(jsonPath("$.detail").value("test authentication failed!"));
     }
 
     @Test
     public void testMethodNotSupported() throws Exception {
         mockMvc.perform(post("/test/access-denied"))
             .andExpect(status().isMethodNotAllowed())
-            .andExpect(jsonPath("$.error").value(com.icthh.xm.commons.exceptions.ErrorConstants.ERR_METHOD_NOT_SUPPORTED))
-            .andExpect(jsonPath("$.error_description").value("Method not supported"));
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("error.http.405"))
+            .andExpect(jsonPath("$.detail").value("Request method 'POST' not supported"));
     }
 
     @Test
     public void testExceptionWithResponseStatus() throws Exception {
         mockMvc.perform(get("/test/response-status"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error").value("error.400"))
-            .andExpect(jsonPath("$.error_description").value("Invalid request"));
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("error.http.400"))
+            .andExpect(jsonPath("$.title").value("test response status"));
     }
 
     @Test
     public void testInternalServerError() throws Exception {
         mockMvc.perform(get("/test/internal-server-error"))
             .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.error").value(com.icthh.xm.commons.exceptions.ErrorConstants.ERR_INTERNAL_SERVER_ERROR))
-            .andExpect(jsonPath("$.error_description").value("Internal server error, please try later"));
-    }
-
-    public void testBusinessException() throws Exception {
-        mockMvc.perform(get("/test/business-exception"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error").value("error.business"))
-            .andExpect(jsonPath("$.error_description").value("test-message"));
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("error.http.500"))
+            .andExpect(jsonPath("$.title").value("Internal Server Error"));
     }
 
 }
