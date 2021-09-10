@@ -8,6 +8,7 @@ import com.icthh.xm.tmf.ms.product.lep.keyresolver.ProfileKeyResolver;
 import com.icthh.xm.tmf.ms.product.web.api.ProductApiDelegate;
 import com.icthh.xm.tmf.ms.product.web.api.model.Product;
 import io.micrometer.core.annotation.Timed;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,6 @@ public class ProductDelegate implements ProductApiDelegate {
     public ResponseEntity<List<Product>> listProduct(String fields,
                                                      Integer offset,
                                                      Integer limit) {
-        return ResponseEntity.ok(ImmutableList.of(new Product()));
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(ImmutableList.of(new Product()));
     }
 }

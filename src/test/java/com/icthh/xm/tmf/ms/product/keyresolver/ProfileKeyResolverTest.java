@@ -13,7 +13,6 @@ import com.icthh.xm.lep.api.LepMethod;
 import com.icthh.xm.lep.api.Version;
 import com.icthh.xm.lep.core.CoreLepManager;
 import com.icthh.xm.tmf.ms.product.lep.keyresolver.ProfileKeyResolver;
-import com.icthh.xm.tmf.ms.product.utils.HeaderRequestExtractor;
 import com.icthh.xm.tmf.ms.product.web.rest.ProductDelegate;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
@@ -62,8 +61,7 @@ class ProfileKeyResolverTest {
 
         when(applicationContext.getBean(LepManager.class)).thenReturn(lepManager);
 
-        HeaderRequestExtractor headerRequestExtractor = new HeaderRequestExtractor();
-        ProfileKeyResolver resolver = new ProfileKeyResolver(headerRequestExtractor);
+        ProfileKeyResolver resolver = new ProfileKeyResolver();
         when(applicationContext.getBean(ProfileKeyResolver.class)).thenReturn(resolver);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
