@@ -12,7 +12,7 @@ import com.icthh.xm.lep.api.LepManager;
 import com.icthh.xm.lep.api.LepMethod;
 import com.icthh.xm.lep.api.Version;
 import com.icthh.xm.lep.core.CoreLepManager;
-import com.icthh.xm.tmf.ms.product.lep.keyresolver.ProfileKeyResolver;
+import com.icthh.xm.tmf.ms.product.lep.keyresolver.OptionalProfileKeyResolver;
 import com.icthh.xm.tmf.ms.product.web.rest.ProductDelegate;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @ExtendWith(SpringExtension.class)
-class ProfileKeyResolverTest {
+class OptionalProfileKeyResolverTest {
     private static final String PROFILE_KEY = "profile";
     private static final String PROFILE_VALUE = "TEST-PROFILE";
     private static final String PROFILE_VALUE_RESOLVED = "TEST_PROFILE";
@@ -61,8 +61,8 @@ class ProfileKeyResolverTest {
 
         when(applicationContext.getBean(LepManager.class)).thenReturn(lepManager);
 
-        ProfileKeyResolver resolver = new ProfileKeyResolver();
-        when(applicationContext.getBean(ProfileKeyResolver.class)).thenReturn(resolver);
+        OptionalProfileKeyResolver resolver = new OptionalProfileKeyResolver();
+        when(applicationContext.getBean(OptionalProfileKeyResolver.class)).thenReturn(resolver);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(PROFILE_KEY, PROFILE_VALUE);

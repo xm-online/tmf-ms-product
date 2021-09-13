@@ -18,7 +18,7 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ProfileKeyResolver extends AppendLepKeyResolver {
+public class OptionalProfileKeyResolver extends AppendLepKeyResolver {
 
     @Override
     protected String[] getAppendSegments(SeparatorSegmentedLepKey baseKey,
