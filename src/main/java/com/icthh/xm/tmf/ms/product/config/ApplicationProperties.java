@@ -25,7 +25,6 @@ public class ApplicationProperties {
     private boolean timelinesEnabled;
     private final Retry retry = new Retry();
     private final Lep lep = new Lep();
-    private List<String> timelineIgnoredHttpMethods = Collections.emptyList();
     private List<String> tenantIgnoredPathList = Collections.emptyList();
 
     @Getter
