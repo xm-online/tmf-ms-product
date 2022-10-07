@@ -157,7 +157,6 @@ xm-config:
 # ===================================================================
 
 application:
-
     timelines-enabled: true
     kafka-enabled: true
     kafka-system-topic: system_topic
