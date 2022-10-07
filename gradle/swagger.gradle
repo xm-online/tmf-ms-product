@@ -13,7 +13,7 @@ openApiGenerate {
     apiFilesConstrainedTo = [""]
     modelFilesConstrainedTo = [""]
     supportingFilesConstrainedTo = ["ApiUtil.java"]
-    configOptions = [delegatePattern: "true"]
+    configOptions = [delegatePattern: "true", async: "true", responseWrapper: "Callable"]
     validateSpec = true
 }
 

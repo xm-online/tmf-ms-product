@@ -13,7 +13,7 @@ import com.icthh.xm.lep.api.LepMethod;
 import com.icthh.xm.lep.api.Version;
 import com.icthh.xm.lep.core.CoreLepManager;
 import com.icthh.xm.tmf.ms.product.lep.keyresolver.OptionalProfileKeyResolver;
-import com.icthh.xm.tmf.ms.product.web.rest.ProductDelegate;
+import com.icthh.xm.tmf.ms.product.service.ProductService;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +57,7 @@ class OptionalProfileKeyResolverTest {
     @Test
     void shouldResolveLepByHeader() throws Throwable {
 
-        Method method = ProductDelegate.class.getMethod("listProduct", String.class, Integer.class, Integer.class);
+        Method method = ProductService.class.getMethod("listProduct", String.class, Integer.class, Integer.class);
 
         when(applicationContext.getBean(LepManager.class)).thenReturn(lepManager);
 
@@ -68,8 +68,8 @@ class OptionalProfileKeyResolverTest {
         request.addHeader(PROFILE_KEY, PROFILE_VALUE);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-        lepServiceHandler.onMethodInvoke(ProductDelegate.class,
-            new ProductDelegate(), method, new Object[]{null});
+        lepServiceHandler.onMethodInvoke(ProductService.class,
+            new ProductService(), method, new Object[]{null});
 
         verify(lepManager)
             .processLep(baseLepKey.capture(), version.capture(), keyResolver.capture(), lepMethod.capture());
