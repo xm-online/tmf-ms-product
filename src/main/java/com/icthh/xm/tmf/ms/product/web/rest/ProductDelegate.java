@@ -6,6 +6,7 @@ import com.icthh.xm.commons.permission.annotation.PrivilegeDescription;
 import com.icthh.xm.tmf.ms.product.lep.keyresolver.OptionalProfileKeyResolver;
 import com.icthh.xm.tmf.ms.product.web.api.ProductApiDelegate;
 import com.icthh.xm.tmf.ms.product.web.api.model.Product;
+import com.icthh.xm.tmf.ms.product.web.api.model.ProductCreate;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,15 @@ public class ProductDelegate implements ProductApiDelegate {
     public ResponseEntity<List<Product>> listProduct(String fields,
                                                      Integer offset,
                                                      Integer limit) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @Timed
+    @LogicExtensionPoint(value = "CreateProduct", resolver = OptionalProfileKeyResolver.class)
+    @PreAuthorize("hasPermission({'profile': @headerRequestExtractor.profile}, 'PRODUCT.CREATE')")
+    @PrivilegeDescription("Privilege to create product")
+    @Override
+    public ResponseEntity<Product> createProduct(ProductCreate productCreate) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 }
