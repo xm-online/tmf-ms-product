@@ -6,7 +6,7 @@ import com.icthh.xm.commons.permission.annotation.PrivilegeDescription;
 import com.icthh.xm.tmf.ms.product.lep.keyresolver.OptionalProfileKeyResolver;
 import com.icthh.xm.tmf.ms.product.web.api.ProductApiDelegate;
 import com.icthh.xm.tmf.ms.product.web.api.model.Product;
-import com.icthh.xm.tmf.ms.product.web.api.model.ProductCreate;
+import com.icthh.xm.tmf.ms.product.web.api.model.ProductUpdate;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +31,11 @@ public class ProductDelegate implements ProductApiDelegate {
     }
 
     @Timed
-    @LogicExtensionPoint(value = "CreateProduct", resolver = OptionalProfileKeyResolver.class)
-    @PreAuthorize("hasPermission({'profile': @headerRequestExtractor.profile}, 'PRODUCT.CREATE')")
-    @PrivilegeDescription("Privilege to create product")
+    @LogicExtensionPoint(value = "PatchProduct", resolver = OptionalProfileKeyResolver.class)
+    @PreAuthorize("hasPermission({'profile': @headerRequestExtractor.profile}, 'PRODUCT.UPDATE.PARTIAL')")
+    @PrivilegeDescription("Privilege to partial product")
     @Override
-    public ResponseEntity<Product> createProduct(ProductCreate productCreate) {
+    public ResponseEntity<Product> patchProduct(String id, ProductUpdate productUpdate) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 }
