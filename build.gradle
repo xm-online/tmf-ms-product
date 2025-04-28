@@ -5,7 +5,6 @@ buildscript {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
-        maven { url "https://repo.spring.io/plugins-release" }
     }
     dependencies {
         //jhipster-needle-gradle-buildscript-dependency - JHipster will add additional gradle build script plugins here
@@ -27,7 +26,6 @@ plugins {
     id "org.sonarqube"
     id "checkstyle"
     id "war"
-    id "com.github.spotbugs"
     id "pmd"
     id "org.openapi.generator"
     //jhipster-needle-gradle-plugins - JHipster will add additional gradle plugins here
@@ -195,13 +193,9 @@ checkstyle {
     configFile = rootProject.file('./qa/checkstyle.xml')
 }
 
-spotbugs {
-    ignoreFailures = true
-}
-
 pmd {
     rulePriority = 3
-    toolVersion = '5.5.4'
+    toolVersion = '6.55.0'
     ignoreFailures = true
     ruleSetFiles = files("./qa/pmd.xml")
 }
